@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound, redirect } from 'next/navigation'
+import { generateAnonymousNickname } from '@/lib/nicknames'
 import AuthClient from './AuthClient'
 
 interface WallAuthPageProps {
@@ -20,10 +21,14 @@ export default async function WallAuthPage({ params }: WallAuthPageProps) {
     notFound()
   }
 
-  // 비밀번호가 없는 공개 담벼락이면 즉시 월 페이지로 리다이렉트
-  if (!wall.password_hash || wall.password_hash.trim() === "") {
-    redirect(`/walls/${id}`)
-  }
+  const isProtected = wall.password_hash && wall.password_hash.trim() !== ""
+  const defaultNickname = generateAnonymousNickname()
 
-  return <AuthClient wallId={id} />
+  return (
+    <AuthClient 
+      wallId={id} 
+      isProtected={!!isProtected} 
+      defaultNickname={defaultNickname} 
+    />
+  )
 }

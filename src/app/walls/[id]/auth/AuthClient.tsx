@@ -12,9 +12,11 @@ import Link from 'next/link'
 
 interface AuthClientProps {
   wallId: string
+  isProtected: boolean
+  defaultNickname: string
 }
 
-export default function AuthClient({ wallId }: AuthClientProps) {
+export default function AuthClient({ wallId, isProtected, defaultNickname }: AuthClientProps) {
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(formData: FormData) {
@@ -44,42 +46,62 @@ export default function AuthClient({ wallId }: AuthClientProps) {
         
         <CardHeader className="p-10 pb-6 text-center">
           <div className="mx-auto mb-6 bg-blue-50 w-24 h-24 rounded-[36px] flex items-center justify-center relative">
-            <Lock className="h-10 w-10 text-blue-500" />
+            <ShieldCheck className="h-10 w-10 text-blue-500" />
             <div className="absolute -bottom-2 -right-2 bg-white p-2 rounded-2xl shadow-lg border border-blue-50">
-              <ShieldCheck className="h-5 w-5 text-blue-400" />
+              <Sparkles className="h-5 w-5 text-blue-400" />
             </div>
           </div>
-          <CardTitle className="text-3xl md:text-4xl font-black tracking-tight mb-2">우리만의 비밀 공간</CardTitle>
+          <CardTitle className="text-3xl md:text-4xl font-black tracking-tight mb-2">
+            {isProtected ? "비밀 공간 입장" : "어떤 별명으로 활동할까요?"}
+          </CardTitle>
           <CardDescription className="text-zinc-500 font-medium text-lg leading-relaxed">
-            이 담벼락은 보호되어 있습니다.<br />이어지는 이야기를 보려면 비밀번호를 입력해 주세요.
+            {isProtected 
+              ? "이 담벼락은 보호되어 있습니다. 별명과 비밀번호를 입력해 주세요." 
+              : "담벼락에 사용될 별명을 정해주세요. 언제든 자유롭게 수정할 수 있습니다."}
           </CardDescription>
         </CardHeader>
 
         <form action={handleSubmit}>
-          <CardContent className="px-10 pb-8">
+          <CardContent className="px-10 pb-8 space-y-6">
             <div className="space-y-3">
-              <Label htmlFor="password" className="text-sm font-bold text-zinc-600 ml-1">입장 비밀번호</Label>
+              <Label htmlFor="nickname" className="text-sm font-bold text-zinc-600 ml-1">나의 닉네임</Label>
               <div className="relative group">
                 <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="비밀번호를 입력하세요"
+                  id="nickname"
+                  name="nickname"
+                  type="text"
+                  placeholder="닉네임을 입력하세요"
+                  defaultValue={defaultNickname}
                   required
-                  autoFocus
-                  className="h-16 rounded-[24px] border-zinc-100 bg-white shadow-inner transition-all text-xl font-bold px-8 focus:ring-4 focus:ring-blue-100"
+                  className="h-16 rounded-[24px] border-zinc-100 bg-white shadow-inner transition-all text-xl font-bold px-8 focus:ring-4 focus:ring-blue-100 placeholder:text-zinc-300"
                 />
               </div>
             </div>
+
+            {isProtected && (
+              <div className="space-y-3">
+                <Label htmlFor="password" className="text-sm font-bold text-zinc-600 ml-1">잠금 비밀번호</Label>
+                <div className="relative group">
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="비밀번호를 입력하세요"
+                    required
+                    className="h-16 rounded-[24px] border-zinc-100 bg-white shadow-inner transition-all text-xl font-bold px-8 focus:ring-4 focus:ring-blue-100"
+                  />
+                </div>
+              </div>
+            )}
           </CardContent>
           
           <CardFooter className="px-10 pb-10">
             <Button type="submit" className="w-full h-16 rounded-[24px] bg-zinc-900 hover:bg-zinc-800 text-white text-xl font-bold transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3" disabled={loading}>
               {loading ? (
-                '인증 중...'
+                '입장 준비 중...'
               ) : (
                 <>
-                  입장하기 <ArrowRight className="h-6 w-6" />
+                  담벼락 입장하기 <ArrowRight className="h-6 w-6" />
                 </>
               )}
             </Button>
@@ -88,7 +110,7 @@ export default function AuthClient({ wallId }: AuthClientProps) {
       </Card>
       
       <p className="mt-12 text-xs font-bold text-zinc-400 tracking-tighter flex items-center gap-2">
-        개인정보 보호를 위해 비밀번호는 암호화되어 관리됩니다.
+        개인정보 보호를 위해 비밀번호는 안전하게 암호화됩니다.
       </p>
     </div>
   )

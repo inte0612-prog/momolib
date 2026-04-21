@@ -42,13 +42,15 @@ export default async function WallPage({ params }: WallPageProps) {
     .order('created_at', { ascending: false })
     .limit(50)
 
-  // 닉네임 처리 (쿠키에서 가져오거나 새로 생성)
+  // 닉네임 처리 (쿠키에서 가져오거나 인증 페이지로 유도)
   const cookieName = `wall_nickname_${id}`
-  let nickname = cookieStore.get(cookieName)?.value
-
-  if (!nickname) {
-    nickname = generateAnonymousNickname()
+  const rawNickname = cookieStore.get(cookieName)?.value
+  
+  if (!rawNickname) {
+    redirect(`/walls/${id}/auth`)
   }
+
+  const nickname = decodeURIComponent(rawNickname)
 
   return (
     <main 
