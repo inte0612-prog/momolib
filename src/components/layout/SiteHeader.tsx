@@ -1,20 +1,32 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
-import { Sparkles, Settings } from 'lucide-react'
+import { Sparkles, LayoutDashboard, LogOut } from 'lucide-react'
 
-interface SiteHeaderProps {
-  globalNickname?: string
-}
+export default function SiteHeader() {
+  const [user, setUser] = useState<any>(null)
+  const supabase = createClient()
 
-export default function SiteHeader({ globalNickname }: SiteHeaderProps) {
-  const handleResetIdentity = () => {
-    // 쿠키를 삭제하고 새로고침하여 닉네임 설정 화면으로 유도
-    document.cookie = 'global_nickname=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
     window.location.reload()
   }
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center p-6">
       <motion.nav 
@@ -29,25 +41,31 @@ export default function SiteHeader({ globalNickname }: SiteHeaderProps) {
           <span className="text-2xl font-black tracking-tighter text-zinc-900">MEMOLIB</span>
         </Link>
 
-        <div className="flex items-center gap-6">
-          {globalNickname ? (
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col items-end">
-                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest leading-none mb-1">Active Identity</span>
-                <span className="text-sm font-bold text-zinc-900">{decodeURIComponent(globalNickname)}</span>
-              </div>
-              <button 
-                onClick={handleResetIdentity}
-                className="p-2 rounded-xl bg-zinc-50 text-zinc-400 hover:text-blue-500 hover:bg-blue-50 transition-all"
-                title="별명 변경하기"
+        <div className="flex items-center gap-4">
+          {user ? (
+            <>
+              <Link 
+                href="/dashboard" 
+                className="text-sm font-bold text-zinc-500 hover:text-blue-500 transition-colors flex items-center gap-1.5"
               >
-                <Settings className="h-4 w-4" />
+                <LayoutDashboard className="h-4 w-4" />
+                대시보드
+              </Link>
+              <button 
+                onClick={handleSignOut}
+                className="text-sm font-bold text-red-400 hover:text-red-500 transition-colors flex items-center gap-1.5 p-2 rounded-xl hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4" />
+                로그아웃
               </button>
-            </div>
+            </>
           ) : (
-            <div className="text-[10px] font-black text-zinc-300 uppercase tracking-widest italic">
-              Anonymous Session
-            </div>
+            <Link 
+              href="/login" 
+              className="px-6 py-2 rounded-2xl font-bold bg-blue-500 text-white shadow-xl shadow-blue-200 hover:bg-blue-600 transition-all text-sm"
+            >
+              로그인
+            </Link>
           )}
         </div>
       </motion.nav>

@@ -21,6 +21,7 @@ interface CreatePostFormProps {
 
 export default function CreatePostForm({ isOpen, onOpenChange, wallId, nickname, parentId = null, parentNickname = null }: CreatePostFormProps) {
   const [content, setContent] = useState('')
+  const [postNickname, setPostNickname] = useState(nickname)
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -52,6 +53,11 @@ export default function CreatePostForm({ isOpen, onOpenChange, wallId, nickname,
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!content.trim() && !image) return
+    
+    if (!postNickname.trim()) {
+      toast.error('별명을 입력해 주세요.')
+      return
+    }
 
     setIsSubmitting(true)
     try {
@@ -82,7 +88,7 @@ export default function CreatePostForm({ isOpen, onOpenChange, wallId, nickname,
         .insert({
           wall_id: wallId,
           content,
-          nickname,
+          nickname: postNickname,
           media_url: mediaUrl,
           parent_id: parentId
         })
@@ -129,15 +135,28 @@ export default function CreatePostForm({ isOpen, onOpenChange, wallId, nickname,
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="content">내용</Label>
-                  <textarea
-                    id="content"
-                    className="w-full h-32 p-4 rounded-xl border border-input bg-background resize-none focus:ring-2 focus:ring-primary focus:outline-none"
-                    placeholder={parentId ? "따뜻한 답글을 남겨주세요..." : "여기에 익명으로 이야기를 남겨주세요..."}
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                  />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="nickname">별명</Label>
+                    <Input 
+                      id="nickname" 
+                      value={postNickname} 
+                      onChange={(e) => setPostNickname(e.target.value)}
+                      placeholder="표시될 별명을 입력하세요"
+                      className="rounded-xl"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="content">내용</Label>
+                    <textarea
+                      id="content"
+                      className="w-full h-32 p-4 rounded-xl border border-input bg-background resize-none focus:ring-2 focus:ring-primary focus:outline-none"
+                      placeholder={parentId ? "따뜻한 답글을 남겨주세요..." : "여기에 익명으로 이야기를 남겨주세요..."}
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
