@@ -2,9 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  const response = await updateSession(request)
-
-  return response
+  return NextResponse.next()
 }
 
 export const config = {
